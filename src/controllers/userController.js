@@ -27,9 +27,6 @@ const updateUser =  async (req, res) => {
     } else{
         newPwd = foundUser.password;
     }
-   
-    
-    
 
     //add changes
     foundUser.firstname = req.body.firstname ?  req.body.firstname : foundUser.firstname;
@@ -41,4 +38,29 @@ const updateUser =  async (req, res) => {
     const unsortedArray = [...filteredArray, foundUser];
     usersDB.setUsers(unsortedArray);
     res.json(usersDB.users);
+}
+
+const deleteUser = (req, res) => {
+        //find user
+        const foundUser = usersDB.users.find(user => user.id === req.body.id);
+        //user check
+        if(!foundUser) return res.status(401).json({ "message": `User ID not found` });
+        const updatedUsers = usersDB.users.filter(person => person.id !== parseInt(req.body.id));
+        usersDB.setUsers(updatedUsers);
+        res.json(usersDB.users);
+}
+
+const getUser = (req, res) => {
+    const user = usersDB.users.find(person => person.id === parseInt(req.params.id));
+    if (!user) {
+        return res.status(400).json({ "message": `User ID ${req.params.id} not found` });
+    }
+    res.json(user);
+}
+
+module.exports = {
+    getAllUser,
+    updateUser,
+    deleteUser,
+    getUser
 }
