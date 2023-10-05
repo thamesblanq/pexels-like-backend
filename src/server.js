@@ -13,14 +13,9 @@ const helmet = require('helmet');
 const logger = require('./util/logger');
 
 // Load .env Enviroment Variables to process.env
+require('dotenv').config();
 
-require('mandatoryenv').load([
-    'DB_URL',
-    'PORT',
-    'SECRET'
-]);
-
-const { PORT } = process.env;
+const  PORT  = process.env.PORT;
 
 
 // Instantiate an Express Application
@@ -44,23 +39,25 @@ app.use('*', (req, res, next) => {
     next();
 })
 
-// Assign Routes
+//Routes
+//register route
+app.use('/register', require('./routes/register.js'));
+//authorization route
+app.use('/auth', require('./routes/auth'));
 
-app.use('/', require('./routes/router.js'));
 
-
-// Handle errors
-app.use(errorHandler());
-
-// Handle not valid route
+// 404 route
 app.use('*', (req, res) => {
     res
     .status(404)
     .json( {status: false, message: 'Endpoint Not Found'} );
 })
 
+// Handle errors
+app.use(errorHandler());
+
 // Open Server on selected Port
 app.listen(
     PORT,
-    () => console.log(`Server listening on port , ${PORT}`)
+    () => console.log(`Server listening on port ${PORT}`)
 );
