@@ -2,7 +2,7 @@ const usersDB = {
     users: require('../models/users.json'),
     setUsers: function (data) { this.users = data }
 }
-const { v4: uuidv4 } = require('uuid');
+//const { v4: uuidv4 } = require('uuid');
 const fsPromises = require('fs').promises;
 const path = require('path');
 
@@ -10,22 +10,21 @@ const bcrypt = require('bcrypt');
 
 const handleNewUser = async (req, res) => {
     //destructure username and password from request body
-    const { user, pwd, firstname, lastname } = req.body;
+    const { user, pwd, name } = req.body;
     //check if there's no user
-    if(!user || !pwd || !firstname || !lastname) return res.status(400).json({ "message": "Please fill all input fields" })// 400 for bad requests
+    if(!user || !pwd || !name ) return res.status(400).json({ "message": "Please fill all input fields" })// 400 for bad requests
     //check for duplicate
     const duplicate = usersDB.users.find(person => person.username === user);
     if(duplicate) return res.status(409).json({ "message": `Username ${user} is already taken.` })// duplicate
     //create new ID for user
-   // const newID = usersDB.users[usersDB.users.length - 1].id ? usersDB.users[usersDB.users.length - 1].id + 1 : 0;
+   const newID = usersDB.users[usersDB.users.length - 1].id ? usersDB.users[usersDB.users.length - 1].id + 1 : 0;
     //encrypt password
     try{
         const hashedPwd = await bcrypt.hash(pwd, 10);
         //save user data
         const newUser = {
-            "id": uuidv4(),
-            "firstname": firstname,
-            "lastname": lastname,
+            "id": newID,
+            "name": name,
             "username": user,
             "password": hashedPwd
         }

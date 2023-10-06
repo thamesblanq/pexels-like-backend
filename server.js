@@ -3,23 +3,18 @@ const {inject, errorHandler} = require('express-custom-error');
 inject(); // Patch express in order to use async / await syntax
 
 // Require Dependencies
-
+require('dotenv').config();
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const helmet = require('helmet');
-
-
+const mongoose = require('mongoose');
+const connectDB = require('./config/dbConn');
 const logger = require('./util/logger');
-
-// Load .env Enviroment Variables to process.env
-require('dotenv').config();
-
 const  PORT  = process.env.PORT;
-
-
-// Instantiate an Express Application
 const app = express();
+
+//connect to DB
+//connectDB();
 
 
 // Configure Express App Instance
@@ -31,7 +26,6 @@ app.use(logger.dev, logger.combined);
 
 app.use(cookieParser());
 app.use(cors());
-app.use(helmet());
 
 // This middleware adds the json header to every response
 app.use('*', (req, res, next) => {
@@ -39,11 +33,12 @@ app.use('*', (req, res, next) => {
     next();
 })
 
-//Routes
-//register route
-app.use('/register', require('./routes/register.js'));
-//authorization route
+//ROUTES
+app.use('/register', require('./routes/register'));
 app.use('/auth', require('./routes/auth'));
+//protected routes-- add security here
+app.use('/user', require('./routes/api/user'));
+app.use('/post', require('./routes/api/post'));
 
 
 // 404 route
@@ -56,8 +51,9 @@ app.use('*', (req, res) => {
 // Handle errors
 app.use(errorHandler());
 
-// Open Server on selected Port
-app.listen(
-    PORT,
-    () => console.log(`Server listening on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
+
+/* mongoose.connection.once('open', () => {
+    console.log('Connected to MongoDB');
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}); */

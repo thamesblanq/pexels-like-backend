@@ -5,10 +5,12 @@ const usersDB = {
 
 const bcrypt = require('bcrypt');
 
-const getAllUser = (req, res) => {
+//get All Users
+const getAllUsers = (req, res) => {
      res.json(usersDB.users )
 } 
 
+//update an existing user
 const updateUser =  async (req, res) => {
     //find user
     const foundUser = usersDB.users.find(user => user.id === req.body.id);
@@ -29,17 +31,16 @@ const updateUser =  async (req, res) => {
     }
 
     //add changes
-    foundUser.firstname = req.body.firstname ?  req.body.firstname : foundUser.firstname;
-    foundUser.lastname = req.body.lastname  ? req.body.lastname : foundUser.lastname;
-    foundUser.username = req.body.username ? req.body.username : foundUser.username;
+    if (req.body.name) foundUser.name = req.body.name;
+    if (req.body.username) foundUser.username = req.body.username;
     if(req.body.password) foundUser.password = newPwd;
-
     const filteredArray = usersDB.users.filter(person => person.id !== parseInt(req.body.id));
     const unsortedArray = [...filteredArray, foundUser];
     usersDB.setUsers(unsortedArray);
     res.json(usersDB.users);
 }
 
+//delete an existing user
 const deleteUser = (req, res) => {
         //find user
         const foundUser = usersDB.users.find(user => user.id === req.body.id);
@@ -47,19 +48,20 @@ const deleteUser = (req, res) => {
         if(!foundUser) return res.status(401).json({ "message": `User ID not found` });
         const updatedUsers = usersDB.users.filter(person => person.id !== parseInt(req.body.id));
         usersDB.setUsers(updatedUsers);
-        res.json(usersDB.users);
+        res.json({ "message": `User with ID ${req.body.id} has been deleted` });
 }
 
+//get a particular user by id
 const getUser = (req, res) => {
     const user = usersDB.users.find(person => person.id === parseInt(req.params.id));
     if (!user) {
-        return res.status(400).json({ "message": `User ID ${req.params.id} not found` });
+        return res.status(400).json({ "message": `User with ID ${req.params.id} not found` });
     }
     res.json(user);
 }
 
 module.exports = {
-    getAllUser,
+    getAllUsers,
     updateUser,
     deleteUser,
     getUser
