@@ -1,19 +1,16 @@
 const postsDB = {
     posts: require('../models/posts.json'),
-    setPosts: function (data) { this.users = data }
+    setPosts: function (data) { this.posts = data }
 };
 const { format } = require('date-fns');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const fsPromises = require('fs').promises;
 
-//working
 const getAllPosts = (req, res) => {
     return res.json(postsDB.posts);
 }
 
-
-//not working
 const createNewPost = async (req, res) => {
     const { userID, desc, tags, imagesUrl, createdBy } = req.body;
     //tags are optional.... i'll create the postID and dateCreated properties
@@ -47,8 +44,6 @@ const createNewPost = async (req, res) => {
       }
 }
 
-
-//working
 const updatePost = (req, res) => {
     const { desc, tags, imagesUrl, postID } = req.body; 
     //find post by id
@@ -78,8 +73,6 @@ const updatePost = (req, res) => {
 
 }
 
-
-//not working
 const deletePost = (req, res) => {
     const { postID } = req.body;
        //find post by id
@@ -94,8 +87,6 @@ const deletePost = (req, res) => {
 
 }
 
-
-//working
 const getPostByID = (req, res) => {
     const post = postsDB.posts.find(post => post.postID === req.params.id.toString());
     if(!post) return res.status(400).json({ "message": `No post with ID ${req.params.id}.` });
