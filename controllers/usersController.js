@@ -36,7 +36,7 @@ const updateUser =  async (req, res) => {
     if(req.body.password) foundUser.password = newPwd;
     const filteredArray = usersDB.users.filter(person => person.id !== parseInt(req.body.id));
     const unsortedArray = [...filteredArray, foundUser];
-    usersDB.setUsers(unsortedArray);
+    usersDB.setUsers(unsortedArray.sort((a, b) => a.id > b.id ? 1 : a.id < b.id ? -1 : 0));
     res.json(usersDB.users);
 }
 

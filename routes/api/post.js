@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const postsController = require('../../controllers/postsController');
+const verifyJWT = require('../../middleware/verifyJWTs')
 
 router.route('/')
     .get(postsController.getAllPosts)
-    .post(postsController.createNewPost)
-    .put(postsController.updatePost)
-    .delete(postsController.deletePost);
+    .post(verifyJWT, postsController.createNewPost)
+    .put(verifyJWT, postsController.updatePost)
+    .delete(verifyJWT, postsController.deletePost);
 
 
 

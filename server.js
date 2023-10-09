@@ -10,7 +10,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const connectDB = require('./config/dbConn');
 const logger = require('./util/logger');
-const  PORT  = process.env.PORT;
+const PORT  = process.env.PORT;
 const app = express();
 
 //connect to DB
@@ -23,7 +23,6 @@ app.use(express.urlencoded());
 
 // Configure custom logger middleware
 app.use(logger.dev, logger.combined);
-
 app.use(cookieParser());
 app.use(cors());
 
@@ -36,6 +35,7 @@ app.use('*', (req, res, next) => {
 //ROUTES
 app.use('/register', require('./routes/register'));
 app.use('/auth', require('./routes/auth'));
+app.use('/refresh', require('./routes/refresh'));
 //protected routes-- add security here
 app.use('/user', require('./routes/api/user'));
 app.use('/post', require('./routes/api/post'));
@@ -51,7 +51,7 @@ app.use('*', (req, res) => {
 // Handle errors
 app.use(errorHandler());
 
-app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
 /* mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB');
