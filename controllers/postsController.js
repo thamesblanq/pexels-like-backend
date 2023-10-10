@@ -8,7 +8,13 @@ const path = require('path');
 const fsPromises = require('fs').promises;
 
 const getAllPosts = (req, res) => {
-    return res.json(postsDB.posts);
+    try{
+        return res.json(postsDB.posts);
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).json({ "message": "Internal server error"})
+    }
+    
 }
 
 const createNewPost = async (req, res) => {
@@ -50,47 +56,63 @@ const updatePost = (req, res) => {
     const foundPost = postsDB.posts.find(post => post.postID === postID)
     if(!foundPost) return res.status(400).json({ "message": `Post with ID ${postID} does not exist.` });//Bad Request
 
-    //update what can be changed
-    if(desc) foundPost.desc = desc;
-    if(tags) foundPost.tags = tags;
-    if(imagesUrl) foundPost.imagesUrl = imagesUrl;
-    foundPost.dateCreated = format(new Date(), "hh-dd-MM-yy");
+    try{
+        //update what can be changed
+        if(desc) foundPost.desc = desc;
+        if(tags) foundPost.tags = tags;
+        if(imagesUrl) foundPost.imagesUrl = imagesUrl;
+        foundPost.dateCreated = format(new Date(), "hh-dd-MM-yy");
 
-    const updatedPost = {
-        "userID": foundPost.userID,
-        "postID": foundPost.postID,//use postID to get post
-        "desc": foundPost.desc,
-        "tags": foundPost.tags,
-        "imagesUrl": foundPost.imagesUrl,
-        "dateCreated":  foundPost.dateCreated,
-        "createdBy": foundPost.createdBy
+        const updatedPost = {
+            "userID": foundPost.userID,
+            "postID": foundPost.postID,//use postID to get post
+            "desc": foundPost.desc,
+            "tags": foundPost.tags,
+            "imagesUrl": foundPost.imagesUrl,
+            "dateCreated":  foundPost.dateCreated,
+            "createdBy": foundPost.createdBy
+        }
+
+        const otherPosts = postsDB.posts.filter(post => post.postID !== foundPost.postID);
+        postsDB.setPosts([...otherPosts, updatedPost]);
+        console.log(updatedPost);
+        return res.json(postsDB.posts);
+    } catch(err){
+        console.log(err.message);
+        res.status(500).json({ "message": "Internal server error" })
     }
-
-    const otherPosts = postsDB.posts.filter(post => post.postID !== foundPost.postID);
-    postsDB.setPosts([...otherPosts, updatedPost]);
-    console.log(updatedPost);
-    return res.json(postsDB.posts);
 
 }
 
 const deletePost = (req, res) => {
     const { postID } = req.body;
-       //find post by id
-       const foundPost = postsDB.posts.find(post => post.postID === postID)
-       if(!foundPost) return res.status(400).json({ "message": `Post with ID ${postID} does not exist.` });//Bad Request
+    //find post by id
+    const foundPost = postsDB.posts.find(post => post.postID === postID)
+    if(!foundPost) return res.status(400).json({ "message": `Post with ID ${postID} does not exist.` });//Bad Request
 
-       const otherPosts = postsDB.posts.filter(post => post.postID !== postID);
-       postsDB.setPosts([...otherPosts]);
-       console.log(otherPosts);
-       console.log(foundPost);
-       return res.json({ "message": `Post with ID ${postID} has been deleted` });
+    try{
+        const otherPosts = postsDB.posts.filter(post => post.postID !== postID);
+        postsDB.setPosts([...otherPosts]);
+        console.log(otherPosts);
+        console.log(foundPost);
+        return res.json({ "message": `Post with ID ${postID} has been deleted` });
+    } catch(err){
+        console.log(err.message);
+        res.status(500).json({ "message": "Internal server error" })
+    }
 
 }
 
 const getPostByID = (req, res) => {
-    const post = postsDB.posts.find(post => post.postID === req.params.id.toString());
-    if(!post) return res.status(400).json({ "message": `No post with ID ${req.params.id}.` });
-    return res.json(post);
+    try{
+        const post = postsDB.posts.find(post => post.postID === req.params.id.toString());
+        if(!post) return res.status(400).json({ "message": `No post with ID ${req.params.id}.` });
+        return res.json(post);
+    } catch (err){
+        console.log(err.message);
+        res.status(500).json({ "message": "Internal server error" })
+    }
+
 }
 
 module.exports = {

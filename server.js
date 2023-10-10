@@ -36,6 +36,7 @@ app.use('*', (req, res, next) => {
 app.use('/register', require('./routes/register'));
 app.use('/auth', require('./routes/auth'));
 app.use('/refresh', require('./routes/refresh'));
+app.use('/logout', require('./routes/logout'));
 //protected routes-- add security here
 app.use('/user', require('./routes/api/user'));
 app.use('/post', require('./routes/api/post'));

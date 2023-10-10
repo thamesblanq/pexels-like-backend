@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 // log directory path
-const logDirectory = path.resolve(__dirname, '../../log');
+const logDirectory = path.resolve(__dirname, '..', 'log', 'access.log');
 
 // ensure log directory exists
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
