@@ -28,9 +28,13 @@ const handleRefreshToken = async (req, res) => {
                 if (err || foundUser.username !== decoded.username) {
                     return res.status(403).json({ "message": 'Forbidden' });
                 }
-
+                const roles = Object.values(foundUser.roles);
                 const accessToken = jwt.sign(
-                    { username: decoded.username },
+                    { 
+                        "UserInfo": {
+                            "username": foundUser.username,
+                            "roles": roles
+                    }},
                     process.env.ACCESS_TOKEN,
                     { expiresIn: '10min' }
                 );
