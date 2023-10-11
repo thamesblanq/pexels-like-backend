@@ -31,7 +31,8 @@
         "nanoid": "^5.0.1",
         "rotating-file-stream": "^1.4.6",
         "uninstall": "^0.0.0",
-        "uuid": "^9.0.1"
+        "uuid": "^9.0.1",
+        "winston": "^3.11.0"
     },
     "devDependencies": {
         "nodemon": "^3.0.1"
