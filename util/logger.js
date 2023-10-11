@@ -1,21 +1,22 @@
 const morgan = require('morgan');
-const rfs = require('rotating-file-stream');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 
-// log directory path
-const logDirectory = path.resolve(__dirname, '..', 'log', 'access.log');
+// Log directory path
+const logDirectory = path.resolve(__dirname, '..', 'log');
 
-// ensure log directory exists
-fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
+// Ensure log directory exists
+if (!fs.existsSync(logDirectory)) {
+    fs.mkdirSync(logDirectory);
+}
 
-// create a rotating write stream
-const accessLogStream = rfs('access.log', {
-    interval: '1d',
-    path: logDirectory
-})
+// Log file path
+const logFilePath = path.join(logDirectory, 'access.log');
+
+// Create a writable stream
+const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
 
 module.exports = {
     dev: morgan('dev'),
-    combined: morgan('combined', { stream: accessLogStream })
-}
+    combined: morgan('combined', { stream: logStream })
+};
