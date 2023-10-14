@@ -1,7 +1,6 @@
 // Patches
 const {inject, errorHandler} = require('express-custom-error');
 inject(); // Patch express in order to use async / await syntax
-
 // Require Dependencies
 require('dotenv').config();
 const express = require('express');
@@ -11,26 +10,27 @@ const mongoose = require('mongoose');
 const connectDB = require('./config/dbConn');
 const logger = require('./util/logger');
 const PORT  = process.env.PORT;
+const rate = require('./middleware/rateLimit');
 const app = express();
 
 //connect to DB
-//connectDB();
+connectDB();
 
 
 // Configure Express App Instance
 app.use(express.json());
 app.use(express.urlencoded());
-
 // Configure custom logger middleware
 app.use(logger.dev, logger.combined);
 app.use(cookieParser());
 app.use(cors());
-
 // This middleware adds the json header to every response
 app.use('*', (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
     next();
 })
+//limiter middleware
+app.use(rate.postLimiter);
 
 //ROUTES
 app.use('/register', require('./routes/register'));
@@ -52,9 +52,9 @@ app.use('*', (req, res) => {
 // Handle errors
 app.use(errorHandler());
 
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+//app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
-/* mongoose.connection.once('open', () => {
+mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB');
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-}); */
+});

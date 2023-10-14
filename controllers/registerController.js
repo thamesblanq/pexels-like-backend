@@ -1,41 +1,28 @@
-const usersDB = {
-    users: require('../models/users.json'),
-    setUsers: function (data) { this.users = data }
-}
-const { v4: uuidv4 } = require('uuid');
-const fsPromises = require('fs').promises;
-const path = require('path');
-
+const User = require('../models/User');
 const bcrypt = require('bcrypt');
 
 const handleNewUser = async (req, res) => {
     //destructure username and password from request body
     const { username, pwd, name } = req.body;
     //check if there's no user
-    if(!username || !pwd || !name ) return res.status(400).json({ "message": "Please fill all input fields" })// 400 for bad requests
+    if(!username || !pwd || !name ) return res.status(400).json({ "message": `Username, password and name are required` })// 400 for bad requests
     //check for duplicate
-    const duplicate = usersDB.users.find(person => person.username === username);
+    const duplicate = await User.findOne({ username: username }).exec();
     if(duplicate) return res.status(409).json({ "message": `Username ${username} already exist.` })// duplicate
-    //encrypt password
+   //check for username being up to 36 characters and halt action......also check on the frontend too
+    if(username.length === 36) return res.status(400).json({ "message": "Username can't be 36 characters" });
+     //encrypt password
     try{
         const hashedPwd = await bcrypt.hash(pwd, 10);
         //save user data
-        const newUser = {
-            "id": uuidv4(),
+        const result = await User.create({
             "name": name,
             "username": username,
-            "roles": { "User": 1000 },
             "password": hashedPwd
-        }
-        //reset usersDB data
-        usersDB.setUsers([...usersDB.users, newUser]);
-        await fsPromises.writeFile(
-            path.join(__dirname, '..', 'models', 'users.json'),
-            JSON.stringify(usersDB.users)
-        );
-        console.log(usersDB.users);
+        });
+        //console.log(result);
         //send back message
-        res.status(201).json({ 'success': `New user ${user} created!` });
+        res.status(201).json({ 'success': `New user ${username} created!` });
 
     } catch(err){
         res.status(500).json({ "message": err.message })//internal server error

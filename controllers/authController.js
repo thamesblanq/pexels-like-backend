@@ -1,13 +1,8 @@
-const usersDB = {
-    users: require('../models/users.json'),
-    setUsers: function (data) { this.users = data }
-}
-
+const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const fsPromises = require('fs').promises;
-const path = require('path');
+
 
 const handleLogin = async (req, res) => {
     //destructure username and password from request body
@@ -15,7 +10,7 @@ const handleLogin = async (req, res) => {
     //check if there's no username
     if(!username || !pwd) return res.status(400).json({ "message": "Please input your username and password" })// 400 fr bad requests
     //find username
-    const foundUser = usersDB.users.find(person => person.username === username);
+    const foundUser = await User.findOne({ username: username }).exec();
     //no username found?
     if(!foundUser) return res.status(401).json({ "message": `User with username ${username} not found`})//unauthorized
     try {
@@ -40,18 +35,15 @@ const handleLogin = async (req, res) => {
                 { expiresIn: '1d' }
             )
             //save refreshToken with user
-            const currentUser = { ...foundUser, refreshToken };
-            const otherUsers = usersDB.users.filter(user => user.id !== currentUser.id);
-            usersDB.setUsers([...otherUsers, currentUser])
-            await fsPromises.writeFile(
-                path.join(__dirname, '..', 'models', 'users.json'),
-                JSON.stringify(usersDB.users)
-            );
+            foundUser.refreshToken = refreshToken;
+            const result = await foundUser.save();
+            //console.log(result);
+            //console.log(roles);
             res.cookie("jwt", refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 24 * 60 * 60 * 1000 })
-            res.json({ accessToken });
+            res.json({ roles, accessToken });
 
     } else {
-        res.sendStatus(401)//Unauthorized
+        res.status(401).json({ "message": "Unauthorized" })//Unauthorized
     }
     } catch(err){
         console.log(err.message);

@@ -9,10 +9,16 @@ router.route('/')
     .get(postsController.getAllPosts)
     .post(verifyJWT, verifyRoles(ROLES_LIST.Admin, ROLES_LIST.User), postsController.createNewPost)
     .put(verifyJWT, verifyRoles(ROLES_LIST.Admin, ROLES_LIST.User), postsController.updatePost)
-    .delete(verifyJWT, verifyRoles(ROLES_LIST.Admin), postsController.deletePost);
+    .delete(verifyJWT, verifyRoles(ROLES_LIST.Admin, ROLES_LIST.User), postsController.deletePost);
 
 
-router.route('/:id')
-    .get(postsController.getPostByID);
+router.route('/:postIDOrUsername')
+    .get(postsController.getPostOrUser);
+
+/* router.route('/:postID')
+    .get(postsController.getPostOrUser); */
+
+
+
 
 module.exports = router;

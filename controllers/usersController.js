@@ -1,13 +1,12 @@
-const usersDB = {
-    users: require('../models/users.json'),
-    setUsers: function (data) { this.users = data }
-};
+const User = require('../models/User');
 const bcrypt = require('bcrypt');
 
 //get All Users
-const getAllUsers = (req, res) => {
+const getAllUsers = async (req, res) => {
     try{
-        res.json(usersDB.users )
+        const users = await User.find();
+        if (!users) return res.status(204).json({ "message": "No users found" })
+        res.json(users)
     } catch (err) {
         console.log(err.message);
         res.status(500).json({ "message": "Internal server error" });
@@ -18,13 +17,15 @@ const getAllUsers = (req, res) => {
 //update an existing user
 const updateUser =  async (req, res) => {
     try{
+        //check for req.body
+        if(!req?.body) return res.status(400).json({ "message": `A request body is needed.` });
         //find user
-        const foundUser = usersDB.users.find(user => user.id === req.body.id);
+        const foundUser = await User.findOne({ username: req.body.username }).exec();
         //user check
-        if(!foundUser) return res.status(401).json({ "message": `User ID not found` });
+        if(!foundUser) return res.status(401).json({ "message": `User with username ${req.body.username} was not found` });
         //password check
         let newPwd;
-        if(req.body.password) {
+        if(req.body?.password) {
             try{
                 newPwd = await bcrypt.hash(req.body.password, 10);
             } catch(err) {
@@ -34,11 +35,10 @@ const updateUser =  async (req, res) => {
             newPwd = foundUser.password;
         }
         //add changes
-        if (req.body.name) foundUser.name = req.body.name;
-        if (req.body.username) foundUser.username = req.body.username;
-        if(req.body.password) foundUser.password = newPwd;
-        usersDB.setUsers(foundUser);
-        res.json(usersDB.users);
+        if (req.body?.name) foundUser.name = req.body.name;
+        if (req.body?.username) foundUser.username = req.body.username;
+        const result = await foundUser.save();
+        res.status(200).json({ "message": "Success" });
     } catch(err) {
         console.log(err.message);
         res.status(500).json({ "message": "Internal server error" })
@@ -47,15 +47,14 @@ const updateUser =  async (req, res) => {
 }
 
 //delete an existing user
-const deleteUser = (req, res) => {
+const deleteUser = async (req, res) => {
+    if (!req?.body?.username) return res.status(400).json({ 'message': 'Username required.' });
     try{
         //find user
-        const foundUser = usersDB.users.find(user => user.id === req.body.id);
-        //user check
-        if(!foundUser) return res.status(401).json({ "message": `User not found` });
-        const updatedUsers = usersDB.users.filter(person => person.id !== req.body.id);
-        usersDB.setUsers(updatedUsers);
-        res.status(200).json({ "message": `User with ID ${req.body.id} has been deleted` });
+        const foundUser = await User.findOne({ username: req.body.username }).exec();
+        if(!foundUser) return res.status(401).json({ "message": `User with username ${req.body.username} was not found` });
+        const result = await foundUser.deleteOne();
+        res.status(200).json({ "message": `User with username ${req.body.username} has been deleted` });
     } catch (err) {
         console.log(err.message);
         res.status(500).json({ "message": "Internal server error" });
@@ -63,20 +62,22 @@ const deleteUser = (req, res) => {
 
 }
 
-//get a particular user by id
-const getUser = (req, res) => {
-    try{
-        const user = usersDB.users.find(person => person.id === req.params.id);
+//get a particular user by username
+const getUser = async (req, res) => {
+    if (!req?.params?.username) return res.status(400).json({ 'message': 'Username required.' });
+    try {
+        const user = await User.findOne({ username: req.params.username }).exec();
         if (!user) {
-            return res.status(400).json({ "message": `User not found` });
+            return res.status(404).json({ "message": `User with username ${req.params.username} was not found` });
         }
         res.json(user);
-    }catch(err){
+        console.log(user);
+    } catch (err) {
         console.log(err.message);
-        res.status(500).json({ "message": "Internal server error" })
+        res.status(500).json({ "message": "Internal server error" });
     }
-
 }
+
 
 module.exports = {
     getAllUsers,
