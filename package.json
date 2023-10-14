@@ -2,7 +2,7 @@
     "name": "uploadBack",
     "version": "1.0.0",
     "description": "uploadBack is the ultimate backend solution",
-    "main": "src/server.js",
+    "main": "server.js",
     "scripts": {
         "start": "node server",
         "dev": "nodemon server"
@@ -12,6 +12,9 @@
         "backend",
         "uploadBack"
     ],
+    "engines": {
+        "node": ">=18.18.0 <19.0.0"
+    },
     "license": "UNLICENSED",
     "dependencies": {
         "bcrypt": "^5.1.1",
@@ -20,6 +23,7 @@
         "date-fns": "^2.30.0",
         "dotenv": "^16.3.1",
         "express": "^4.17.1",
+        "express-custom-error": "^1.9.4",
         "express-rate-limit": "^7.1.1",
         "has-keys": "^0.1.0",
         "http-proxy-middleware": "^2.0.6",
