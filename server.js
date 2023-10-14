@@ -13,9 +13,10 @@ const PORT  = process.env.PORT;
 const rate = require('./middleware/rateLimit');
 const app = express();
 
+
+app.set('trust-proxy', true);
 //connect to DB
 connectDB();
-
 
 // Configure Express App Instance
 app.use(express.json());
